@@ -22,10 +22,11 @@ print(f'Aliases in {basename(normpath(RC_FILE))}:\n')
 # [print(a) for a in re.findall(pat, rc)[1:-1]] # omit first comment and alias for this script
 
 ## Using loop instead
-# for l in rc.split('\n'):
-#     try:
-#         if l.split()[0] == 'alias':
-#             print(l.replace('alias ', ''))
-#     except:
-#         continue
+for l in rc.split('\n'):
+    line = l.split()
+    try:
+        if line[0] == 'alias' and 'aliases' not in line[1]:
+            print(l.replace('alias ', ''))
+    except:
+        continue
     
