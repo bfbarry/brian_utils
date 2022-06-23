@@ -11,10 +11,10 @@ import sys
 RC_LOC = { 'mbp' : '/Users/brianbarry/.zshrc',
            'ucsd': '/home/bfbarry/.bashrc'    }
 
-RC_FILE = RC_LOC[sys.argv[1]]
-with open(RC_FILE, 'r') as f:
+rc_file = RC_LOC[sys.argv[1]]
+with open(rc_file, 'r') as f:
     rc = f.read()
 
 # https://stackoverflow.com/questions/5006716/getting-the-text-that-follows-after-the-regex-match
-print(f'Aliases in {basename(normpath(RC_FILE))}:\n')
+print(f'Aliases in {basename(normpath(rc_file))}:\n')
 [print(a) for a in re.findall(r'^alias (.*)$', rc, re.M) if __file__ not in a] # omit alias for this script
