@@ -5,7 +5,7 @@ import os
 
 
 BOOKMARK_PATH = os.path.dirname(__file__) + '/bookmarks.json'
-SHELL_PATH = '/bin/zsh'
+SHELL_PATH = sp.check_output('echo $SHELL', shell=True).decode("utf-8").replace('\n','') # for zsh get weird source .zshrc error
     
 
 try:
