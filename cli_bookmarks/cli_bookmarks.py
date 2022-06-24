@@ -1,12 +1,18 @@
 import subprocess as sp
 import json
 import argparse
+import os
 
-from regex import W
 
+BOOKMARK_PATH = os.path.dirname(__file__) + '/bookmarks.json'
+SHELL_PATH = '/bin/zsh'
+    
 
-with open('bookmarks.json', 'w') as f:
-    bookmarks = json.load(f) # {"bookmark": "path/to/cd"}
+try:
+    with open(BOOKMARK_PATH, 'r') as f:
+        bookmarks = json.load(f) # {"bookmark": "path/to/cd"}
+except FileNotFoundError:
+    bookmarks = {}
 
 
 def save_bookmark(bookmark, path):
@@ -14,25 +20,35 @@ def save_bookmark(bookmark, path):
     shell call: python cli_bookmarks.py -s {bookmark} {path}
     use path = `pwd` to save current path
     """
+    if bookmarks.get(bookmark):
+        print('Bookmark already exists!\n')
+        return
     bookmarks[bookmark] = path
-    with open('bookmarks.json', 'w') as f:
-        json.dump(bookmarks, f)
+    with open(BOOKMARK_PATH, 'w') as f:
+        json.dump(bookmarks, f, indent=4)
 
 
 def print_bookmarks():
     """shell call: python cli_bookmarks.py -p"""
-    print(bookmarks)
+    print(json.dumps(bookmarks, indent=4))
 
 
 def goto_bookmark(bookmark):
     """shell call: python cli_bookmarks.py -g {bookmark}"""
+    if not bookmarks.get(bookmark):
+        print('bookmark does not exist!')
+        return
     print(bookmarks[bookmark])
     
 
 def del_bookmark(bookmark):
     """shell call: python cli_bookmarks.py -d"""
+    if not bookmarks.get(bookmark):
+        print('bookmark does not exist!\n')
+        return
+    print(f'Deleting bookmark {bookmark} -> {bookmarks[bookmark]}')
     del bookmarks[bookmark]
-    with open('bookmarks.json', 'w') as f:
+    with open(BOOKMARK_PATH, 'w') as f:
         json.dump(bookmarks, f)
 
 
@@ -42,12 +58,12 @@ def init(rc_path):
     shell call: python cli_bookmarks.py -d (only run once or if __file__ path changes)
     """
     cmd = f'python3 {__file__}'
-    config = [ "# >>> cli_bookmarks init >>>",
-               f"alias s='{cmd} -s $1 $2'",
-               f"function g() {{cd $({cmd} -g $1) }}'",
-               f"alias p='{cmd} -p'",
-               f"alias d='{cmd} -d $1'",
-               "# <<< cli_bookmarks init <<<" ]
+    config = [ '\n\n# >>> cli_bookmarks init >>>\n',
+               f'function s() {{ echo $({cmd} -s $1 $2) }}\n', # need echoes in case of print() to not pass as command
+               f'function g() {{ cd "$({cmd} -g $1)" }}\n',
+               f'function p() {{ echo $({cmd} -p) }}\n',
+               f'function d() {{ echo $({cmd} -d $1) }}\n',
+               '# <<< cli_bookmarks init <<<' ]
     with open(rc_path, 'r') as f:
         rc = f.readlines()
     
@@ -59,16 +75,19 @@ def init(rc_path):
         i1, i2 = rc.index(config[0]), rc.index(config[-1]) + 1
         rc = rc[:i1] + rc[i2:] + config # remove existing config
         with open(rc_path, 'w') as f:
-            f.write('\n'.join(rc))
-        sp.call(f'source {rc_path}')
-        print(f'changed cmd path to {cmd}')
+            f.writelines(rc)
+        sp.call(f'source {rc_path}', shell=True, executable=SHELL_PATH)
+        print(f'changed cmd path to {__file__}')
         
     else:
         rc += config
-        print(f'initialized config with cmd path at {cmd}')
+        with open(rc_path, 'w') as f:
+            f.writelines(rc)
+        sp.call(f'source {rc_path}', shell=True, executable=SHELL_PATH)
+        print(f'initialized config with cmd path at {__file__}')
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     # take in cli arg input
     # call one of the functions with that input
     parser = argparse.ArgumentParser()
@@ -79,11 +98,11 @@ if __name__ == 'main':
     parser.add_argument('-i', dest='init')
 
     args = parser.parse_args()
-
+    # print('right here!', args, flush=True)
     if args.save:
         save_bookmark(args.save[0], args.save[1])
     elif args.go:
-        goto_bookmark(args.go[0])
+        goto_bookmark(args.go)
     elif args.print:
         print_bookmarks()
     elif args.delete:
