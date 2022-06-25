@@ -59,10 +59,10 @@ def init(rc_path):
     """
     cmd = f'python3 {__file__}'
     config = [ '\n\n# >>> cli_bookmarks init >>>\n',
-               f'function s() {{ echo $({cmd} -s $1 $2) }}\n', # need echoes in case of print() to not pass as command
-               f'function g() {{ cd "$({cmd} -g $1)" }}\n',
-               f'function p() {{ echo $({cmd} -p) }}\n',
-               f'function d() {{ echo $({cmd} -d $1) }}\n',
+               f'function s() {{ echo $({cmd} -s $1 $2); }}\n', # need echoes in case of print() to not pass as command
+               f'function g() {{ cd "$({cmd} -g $1)"; }}\n',
+               f'function p() {{ echo $({cmd} -p); }}\n',
+               f'function d() {{ echo $({cmd} -d $1); }}\n',
                '# <<< cli_bookmarks init <<<' ]
     with open(rc_path, 'r') as f:
         rc = f.readlines()
