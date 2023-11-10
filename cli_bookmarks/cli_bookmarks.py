@@ -23,6 +23,8 @@ def save_bookmark(bookmark, path):
     if bookmarks.get(bookmark):
         print('Bookmark already exists!\n')
         return
+    if path == '.':
+        path = os.getcwd()
     bookmarks[bookmark] = path
     with open(BOOKMARK_PATH, 'w') as f:
         json.dump(bookmarks, f, indent=4)
