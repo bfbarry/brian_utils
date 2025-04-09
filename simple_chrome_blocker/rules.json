@@ -1,0 +1,21 @@
+[
+  {
+    "id": 1,
+    "priority": 2,
+    "action": { "type": "allow" },
+    "condition": {
+      "regexFilter": "^https://www\\.reddit\\.com/r/[^/]+/comments/.*",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "||reddit.com",
+      "resourceTypes": ["main_frame"]
+    }
+  }
+]
+
